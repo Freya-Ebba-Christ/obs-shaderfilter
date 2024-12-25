@@ -3,7 +3,6 @@ Updated obs-shaderfilter.c to reflect current development and improvements
 - Added attribution for the current version: "This version by Freya Ebba Christ is based on Version 1.21 by Charles Fettinger."
 - Retained original attributions for Charles Fettinger and nleseul.
 - Refactored code for better readability, maintainability, and modern C++ compliance.
-- Replaced all instances of NULL with nullptr.
 - Improved compatibility with modern Linux environments (tested on Ubuntu 24.04.1 LTS, Noble).
 - Enhanced parameter handling, shader effect reload logic, and resource management.
 - Revised comments for clearer documentation and developer guidance.
@@ -99,7 +98,7 @@ struct effect_param_data
 	{
 		long long i;
 		double f;
-		char string;
+		char *string;
 	} value;
 };
 
@@ -181,39 +180,39 @@ static void shader_filter_reload_effect(struct shader_filter_data *filter)
 	for (size_t param_index = 0; param_index < param_count; param_index++)
 	{
 		struct effect_param_data *param = (filter->stored_param_list.array + param_index);
-		if (param->image != nullptr)
+		if (param->image != NULL)
 		{
 			obs_enter_graphics();
 			gs_image_file_free(param->image);
 			obs_leave_graphics();
 
 			bfree(param->image);
-			param->image = nullptr;
+			param->image = NULL;
 		}
 	}
 
 	da_free(filter->stored_param_list);
 
-	filter->param_elapsed_time = nullptr;
-	filter->param_uv_offset = nullptr;
-	filter->param_uv_pixel_interval = nullptr;
-	filter->param_uv_scale = nullptr;
-	filter->param_uv_size = nullptr;
-	filter->param_rand_f = nullptr;	
-	filter->param_rand_activation_f = nullptr;
-	filter->param_loops = nullptr;
-	filter->param_local_time = nullptr;
+	filter->param_elapsed_time = NULL;
+	filter->param_uv_offset = NULL;
+	filter->param_uv_pixel_interval = NULL;
+	filter->param_uv_scale = NULL;
+	filter->param_uv_size = NULL;
+	filter->param_rand_f = NULL;	
+	filter->param_rand_activation_f = NULL;
+	filter->param_loops = NULL;
+	filter->param_local_time = NULL;
 
-	if (filter->effect != nullptr)
+	if (filter->effect != NULL)
 	{
 		obs_enter_graphics();
 		gs_effect_destroy(filter->effect);
-		filter->effect = nullptr;
+		filter->effect = NULL;
 		obs_leave_graphics();
 	}
 
 	// Load text and build the effect from the template, if necessary. 
-	const char *shader_text = nullptr;
+	const char *shader_text = NULL;
 	bool use_template =
 		!obs_data_get_bool(settings, "override_entire_effect");
 
@@ -228,7 +227,7 @@ static void shader_filter_reload_effect(struct shader_filter_data *filter)
 		use_template = true;
 	}
 
-	if (shader_text == nullptr)
+	if (shader_text == NULL)
 	{
 		shader_text = "";
 	}
@@ -257,17 +256,17 @@ static void shader_filter_reload_effect(struct shader_filter_data *filter)
 	}
 
 	// Create the effect. 
-	char *errors = nullptr;
+	char *errors = NULL;
 
 	obs_enter_graphics();
-	filter->effect = gs_effect_create(effect_text.array, nullptr, &errors);
+	filter->effect = gs_effect_create(effect_text.array, NULL, &errors);
 	obs_leave_graphics();
 
 	dstr_free(&effect_text);
 
-	if (filter->effect == nullptr)
+	if (filter->effect == NULL)
 	{
-		blog(LOG_WARNING, "[obs-shaderfilter] Unable to create effect. Errors returned from parser:\n%s", (errors == nullptr || strlen(errors) == 0 ? "(None)" : errors));
+		blog(LOG_WARNING, "[obs-shaderfilter] Unable to create effect. Errors returned from parser:\n%s", (errors == NULL || strlen(errors) == 0 ? "(None)" : errors));
 	}
 
 	// Store references to the new effect's parameters. 
@@ -440,7 +439,7 @@ static bool shader_filter_reload_effect_clicked(obs_properties_t *props, obs_pro
 
 	filter->reload_effect = true;
 
-	obs_source_update(filter->context, nullptr);
+	obs_source_update(filter->context, NULL);
 
 	return false;
 }
@@ -459,7 +458,7 @@ static obs_properties_t *shader_filter_properties(void *data)
 	dstr_cat(&examples_path, "/examples");
 
 	obs_properties_t *props = obs_properties_create();
-	obs_properties_set_param(props, filter, nullptr);
+	obs_properties_set_param(props, filter, NULL);
 
 	obs_properties_add_int(props, "expand_left",
 		obs_module_text("ShaderFilter.ExpandLeft"), 0, 9999, 1);
@@ -482,7 +481,7 @@ static obs_properties_t *shader_filter_properties(void *data)
 
 	obs_property_t *file_name = obs_properties_add_path(props, "shader_file_name",
 		obs_module_text("ShaderFilter.ShaderFileName"), OBS_PATH_FILE,
-		nullptr, examples_path.array);
+		NULL, examples_path.array);
 	obs_property_set_modified_callback(file_name, shader_filter_file_name_changed);
 
 	obs_property_t* use_sliders = obs_properties_add_bool(props, "use_sliders",
@@ -542,7 +541,7 @@ static obs_properties_t *shader_filter_properties(void *data)
 			obs_properties_add_color(props, param_name, display_name.array);
 			break;
 		case GS_SHADER_PARAM_TEXTURE:
-			obs_properties_add_path(props, param_name, display_name.array, OBS_PATH_FILE, shader_filter_texture_file_filter, nullptr);
+			obs_properties_add_path(props, param_name, display_name.array, OBS_PATH_FILE, shader_filter_texture_file_filter, NULL);
 			break;
 		case GS_SHADER_PARAM_STRING:
 			obs_properties_add_text(props, param_name, display_name.array, OBS_TEXT_MULTILINE);
@@ -592,22 +591,22 @@ static void shader_filter_update(void *data, obs_data_t *settings)
 		switch (param->type)
 		{
 		case GS_SHADER_PARAM_BOOL:
-			if (gs_effect_get_default_val(param->param) != nullptr)
+			if (gs_effect_get_default_val(param->param) != NULL)
 				obs_data_set_default_bool(settings, param_name, *(bool *)gs_effect_get_default_val(param->param));
 			param->value.i = obs_data_get_bool(settings, param_name);
 			break;
 		case GS_SHADER_PARAM_FLOAT:
-			if (gs_effect_get_default_val(param->param) != nullptr)
+			if (gs_effect_get_default_val(param->param) != NULL)
 				obs_data_set_default_double(settings, param_name, *(float *)gs_effect_get_default_val(param->param));
 			param->value.f = obs_data_get_double(settings, param_name);
 			break;
 		case GS_SHADER_PARAM_INT:
-			if (gs_effect_get_default_val(param->param) != nullptr)
+			if (gs_effect_get_default_val(param->param) != NULL)
 				obs_data_set_default_int(settings, param_name, *(int *)gs_effect_get_default_val(param->param));
 			param->value.i = obs_data_get_int(settings, param_name);
 			break;
 		case GS_SHADER_PARAM_VEC4: // Assumed to be a color.
-			if (gs_effect_get_default_val(param->param) != nullptr)
+			if (gs_effect_get_default_val(param->param) != NULL)
 			{
 				obs_data_set_default_int(settings, param_name, *(unsigned int *)gs_effect_get_default_val(param->param));
 			}
@@ -619,7 +618,7 @@ static void shader_filter_update(void *data, obs_data_t *settings)
 			param->value.i = obs_data_get_int(settings, param_name);
 			break;
 		case GS_SHADER_PARAM_TEXTURE:
-			if (param->image == nullptr)
+			if (param->image == NULL)
 			{
 				param->image = bzalloc(sizeof(gs_image_file_t));
 			}
@@ -637,7 +636,7 @@ static void shader_filter_update(void *data, obs_data_t *settings)
 			obs_leave_graphics();
 			break;
 		case GS_SHADER_PARAM_STRING:
-			if (gs_effect_get_default_val(param->param) != nullptr)
+			if (gs_effect_get_default_val(param->param) != NULL)
 				obs_data_set_default_string(settings, param_name, (const char *)gs_effect_get_default_val(param->param));			
 			param->value.string = (char *)obs_data_get_string(settings, param_name);
 
@@ -701,26 +700,26 @@ static void shader_filter_render(void *data, gs_effect_t *effect)
 
 	struct shader_filter_data *filter = data;
 
-	if (filter->effect != nullptr)
+	if (filter->effect != NULL)
 	{
 		if (!obs_source_process_filter_begin(filter->context, GS_RGBA,
 			OBS_NO_DIRECT_RENDERING))
 		{
 			return;
 		}
-		if (filter->param_uv_scale != nullptr) {
+		if (filter->param_uv_scale != NULL) {
 			gs_effect_set_vec2(filter->param_uv_scale,
 					   &filter->uv_scale);
 		}
-		if (filter->param_uv_offset != nullptr) {
+		if (filter->param_uv_offset != NULL) {
 			gs_effect_set_vec2(filter->param_uv_offset,
 					   &filter->uv_offset);
 		}
-		if (filter->param_uv_pixel_interval != nullptr) {
+		if (filter->param_uv_pixel_interval != NULL) {
 			gs_effect_set_vec2(filter->param_uv_pixel_interval,
 					   &filter->uv_pixel_interval);
 		}
-		if (filter->param_elapsed_time != nullptr) {
+		if (filter->param_elapsed_time != NULL) {
 			if (filter->use_shader_elapsed_time) {
 				gs_effect_set_float(
 					filter->param_elapsed_time,
@@ -731,26 +730,26 @@ static void shader_filter_render(void *data, gs_effect_t *effect)
 						    filter->elapsed_time);
 			}
 		}
-		if (filter->param_uv_size != nullptr) {
+		if (filter->param_uv_size != NULL) {
 			gs_effect_set_vec2(filter->param_uv_size,
 					   &filter->uv_size);
 		}
-		if (filter->param_local_time != nullptr) {
+		if (filter->param_local_time != NULL) {
 			gs_effect_set_float(filter->param_local_time,
 					    filter->local_time);
 		}
-		if (filter->param_loops != nullptr) {
+		if (filter->param_loops != NULL) {
 			gs_effect_set_int(filter->param_loops, filter->loops);
 		}
-		if (filter->param_rand_f != nullptr) {
+		if (filter->param_rand_f != NULL) {
 			gs_effect_set_float(filter->param_rand_f,
 					    filter->rand_f);
 		}
-		if (filter->param_rand_activation_f != nullptr) {
+		if (filter->param_rand_activation_f != NULL) {
 			gs_effect_set_float(filter->param_rand_activation_f,
 					    filter->rand_activation_f);
 		}
-		if (filter->param_rand_instance_f != nullptr) {
+		if (filter->param_rand_instance_f != NULL) {
 			gs_effect_set_float(filter->param_rand_instance_f,
 					    filter->rand_instance_f);
 		}
@@ -778,11 +777,11 @@ static void shader_filter_render(void *data, gs_effect_t *effect)
 				gs_effect_set_vec4(param->param, &color);
 				break;
 			case GS_SHADER_PARAM_TEXTURE:
-				gs_effect_set_texture(param->param, (param->image ? param->image->texture : nullptr));
+				gs_effect_set_texture(param->param, (param->image ? param->image->texture : NULL));
 				break;
 			case GS_SHADER_PARAM_STRING:
 				gs_effect_set_val(param->param,
-					(param->value.string ? param->value.string : nullptr),
+					(param->value.string ? param->value.string : NULL),
 					gs_effect_get_val_size(param->param));
 				break;
 			}
