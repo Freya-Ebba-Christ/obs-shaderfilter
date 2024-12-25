@@ -1,4 +1,4 @@
-# obs-shaderfilter 1.21
+# obs-shaderfilter 1.21.1
 
 ## Introduction
 
@@ -91,6 +91,21 @@ handle these variables being missing, but the shader may malfunction.)
 * **`uv_pixel_interval`** (`float2`)&mdash;This is the size in UV coordinates of an individual texel. You can use
   this to convert the UV coordinates of the pixel being processed to the coordinates of that texel in the source
   texture, or otherwise scale UV coordinate distances into texel distances.
+
+### Code cleanup by Freya Ebba Christ
+
+/*
+Updated obs-shaderfilter.c to reflect current development and improvements
+- Added attribution for the current version: "This version by Freya Ebba Christ is based on Version 1.21 by Charles Fettinger."
+- Retained original attributions for Charles Fettinger and nleseul.
+- Refactored code for better readability, maintainability, and modern C++ compliance.
+- Replaced all instances of NULL with nullptr.
+- Improved compatibility with modern Linux environments (tested on Ubuntu 24.04.1 LTS, Noble).
+- Enhanced parameter handling, shader effect reload logic, and resource management.
+- Revised comments for clearer documentation and developer guidance.
+*/	
+// Version 1.21 by Charles Fettinger https://github.com/Oncorporation/obs-shaderfilter
+// original version by nleseul https://github.com/nleseul/obs-shaderfilter
 
 ### New Options in version 1.1+
 * **`Use Slider Inputs`**&mdash; Converts Integer and floating point inputs into sliders in the UI.
