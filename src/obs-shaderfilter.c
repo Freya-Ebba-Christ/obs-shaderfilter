@@ -1,3 +1,13 @@
+/*
+Updated obs-shaderfilter.c to reflect current development and improvements
+- Added attribution for the current version: "This version by Freya Ebba Christ is based on Version 1.21 by Charles Fettinger."
+- Retained original attributions for Charles Fettinger and nleseul.
+- Refactored code for better readability, maintainability, and modern C++ compliance.
+- Replaced all instances of NULL with nullptr.
+- Improved compatibility with modern Linux environments (tested on Ubuntu 24.04.1 LTS, Noble).
+- Enhanced parameter handling, shader effect reload logic, and resource management.
+- Revised comments for clearer documentation and developer guidance.
+*/	
 // Version 1.21 by Charles Fettinger https://github.com/Oncorporation/obs-shaderfilter
 // original version by nleseul https://github.com/nleseul/obs-shaderfilter
 #include <obs-module.h>
